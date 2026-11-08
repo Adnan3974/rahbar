@@ -1,0 +1,24 @@
+# GitHub Branch Protection Rule: main
+
+Repository: Adnan3974/rahbar
+Branch: main
+
+Status: Active (Protected)
+Settings:
+  - Require a pull request before merging: ENABLED
+    - Require approvals: 1
+    - Dismiss stale pull request approvals when new commits are pushed: ENABLED
+    - Require review from Code Owners: ENABLED
+  - Require status checks to pass before merging: ENABLED
+    - Require branches to be up to date before merging: ENABLED
+    - Status checks required:
+      - lint (Ruff & Mypy)
+      - test (Pytest & Coverage >= 60%)
+      - manifests (Kubeconform -strict)
+      - build (Docker Buildx multi-arch verification)
+      - scan (Trivy Security Vulnerability Scan)
+      - e2e-eval (KinD cluster integration & evaluation gate)
+  - Do not allow bypassing the above settings: ENABLED
+  - Restrict who can push to matching branches: Nobody (all changes via PR)
+  - Allow force pushes: DISABLED
+  - Allow deletions: DISABLED

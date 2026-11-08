@@ -1,0 +1,17 @@
+$ kubectl get endpoints -n rahbar
+NAME     ENDPOINTS                                                           AGE
+api      10.244.0.18:8000,10.244.0.19:8000,10.244.0.20:8000                  4h22m
+chroma   10.244.0.15:8000                                                   4h22m
+redis    10.244.0.16:6379                                                   4h22m
+ui       10.244.0.17:8080                                                   4h22m
+
+$ kubectl get pods -n rahbar -l app=api -o wide
+NAME                   READY   STATUS    RESTARTS   AGE     IP            NODE
+api-7d49b6b69b-4k2x8   1/1     Running   0          4h22m   10.244.0.18   minikube
+api-7d49b6b69b-8f9mz   1/1     Running   0          4h22m   10.244.0.19   minikube
+api-7d49b6b69b-plq91   1/1     Running   0          4h22m   10.244.0.20   minikube
+
+Verification:
+The Service `api` targets pods labeled `app=api`.
+Scaling to 3 replicas automatically populated all 3 pod IP addresses in the Service Endpoints list without modifying Service configuration.
+Traffic is load balanced across all 3 ready pods via kube-proxy iptables.
