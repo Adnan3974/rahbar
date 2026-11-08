@@ -56,7 +56,7 @@ jobs:
           context: api
           push: true
           tags: |
-            adnan3974/rahbar-api:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/rahbar-api:${{ github.sha }}
 
       - name: Build & Push Indexer Image
         uses: docker/build-push-action@v6
@@ -64,7 +64,7 @@ jobs:
           context: indexer
           push: true
           tags: |
-            adnan3974/rahbar-indexer:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/rahbar-indexer:${{ github.sha }}
 
       - name: Build & Push UI Image
         uses: docker/build-push-action@v6
@@ -72,7 +72,7 @@ jobs:
           context: ui
           push: true
           tags: |
-            adnan3974/rahbar-ui:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/rahbar-ui:${{ github.sha }}
 
   deploy:
     name: Deploy to Kubernetes Cluster
@@ -90,9 +90,9 @@ jobs:
       - name: Set Image Tags
         run: |
           cd k8s/overlays/prod
-          kustomize edit set image rahbar-api:dev=adnan3974/rahbar-api:${{ github.sha }} || true
-          kustomize edit set image rahbar-indexer:dev=adnan3974/rahbar-indexer:${{ github.sha }} || true
-          kustomize edit set image rahbar-ui:dev=adnan3974/rahbar-ui:${{ github.sha }} || true
+          kustomize edit set image rahbar-api:dev=${{ secrets.DOCKERHUB_USERNAME }}/rahbar-api:${{ github.sha }} || true
+          kustomize edit set image rahbar-indexer:dev=${{ secrets.DOCKERHUB_USERNAME }}/rahbar-indexer:${{ github.sha }} || true
+          kustomize edit set image rahbar-ui:dev=${{ secrets.DOCKERHUB_USERNAME }}/rahbar-ui:${{ github.sha }} || true
 
       - name: Deploy Manifests
         run: |
