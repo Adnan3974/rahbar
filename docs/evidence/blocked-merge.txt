@@ -1,0 +1,23 @@
+# Pull Request #14: Test Chunking Optimization (Intentional Regression)
+
+Base: main <- Compare: dev-chunk-break
+Status: Open (Merge Blocked)
+
+Checks:
+  ✖ e2e-eval / evaluation gate (pull_request) - FAILED in 2m 14s
+    Details:
+      - recall@5 dropped by 18.50%, exceeding max allowed drop of 5% (baseline: 92.86%, current: 74.36%)
+      - citation validity is 91.20%; expected at least 95%
+  ✔ lint / Ruff & Mypy (pull_request) - SUCCESS
+  ✔ test / Pytest & Coverage (pull_request) - SUCCESS
+  ✔ manifests / Kubeconform (pull_request) - SUCCESS
+  ✔ build / Container Images (pull_request) - SUCCESS
+  ✔ scan / Trivy Security (pull_request) - SUCCESS
+
+Review:
+  ✔ Approved by peer reviewer
+
+Merge Box State:
+  [Merging is blocked]
+  "At least 1 required check has failed before this pull request can be merged."
+  Button: [Merge pull request] (GREYED OUT / DISABLED)

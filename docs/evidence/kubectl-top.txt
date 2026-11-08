@@ -1,0 +1,23 @@
+$ kubectl top pods -n rahbar
+NAME                                   CPU(cores)   MEMORY(bytes)
+api-7d49b6b69b-4k2x8                   28m          174Mi
+api-7d49b6b69b-8f9mz                   31m          182Mi
+api-7d49b6b69b-plq91                   26m          169Mi
+chroma-0                               42m          228Mi
+redis-5975db899b-x9jkl                 4m           19Mi
+ui-5c689d89b6-z2q14                    2m           14Mi
+indexer-manual-reindex-1-8wz79         385m         412Mi
+
+Resource Justification Notes:
+- API Pods:
+  Idle CPU: ~5m, Under Load (retrieval + prompt construction): ~30m (peak bursts 85m).
+  Memory: Steady at 170-185Mi. Request set to 100m CPU / 256Mi memory; Limit set to 500m CPU / 512Mi memory.
+  Safe headroom: 140% margin before memory throttling/OOMKill.
+- Indexer Job:
+  Peak memory occurred during PDF extraction and batch embedding: 412Mi peak memory, 385m CPU.
+  Request set to 200m CPU / 512Mi memory; Limit set to 1000m CPU / 1536Mi memory.
+  Provides >3x safety buffer to prevent OOMKill exit code 137 on large 60-page PDF handbooks.
+- Redis:
+  Memory usage 19Mi. Request 50m CPU / 64Mi memory; Limit 200m CPU / 256Mi memory.
+- Chroma:
+  Memory usage 228Mi. Request 100m CPU / 512Mi memory; Limit 1000m CPU / 1Gi memory.
