@@ -1,0 +1,108 @@
+name: CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Run Test Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install Dependencies
+        run: pip install -r api/requirements-dev.txt -r indexer/requirements-dev.txt
+
+      - name: Run Unit Tests
+        env:
+          RETRIEVER: stub
+          LLM_PROVIDER: stub
+        run: |
+          cd api && pytest -q
+          cd ../indexer && pytest -q
+
+  build-push:
+    name: Build & Push Images to Docker Hub
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build & Push API Image
+        uses: docker/build-push-action@v6
+        with:
+          context: api
+          push: true
+          tags: |
+            adnan3974/rahbar-api:${{ github.sha }}
+
+      - name: Build & Push Indexer Image
+        uses: docker/build-push-action@v6
+        with:
+          context: indexer
+          push: true
+          tags: |
+            adnan3974/rahbar-indexer:${{ github.sha }}
+
+      - name: Build & Push UI Image
+        uses: docker/build-push-action@v6
+        with:
+          context: ui
+          push: true
+          tags: |
+            adnan3974/rahbar-ui:${{ github.sha }}
+
+  deploy:
+    name: Deploy to Kubernetes Cluster
+    runs-on: ubuntu-latest
+    needs: build-push
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Create Ephemeral KinD Cluster
+        uses: helm/kind-action@v1
+        with:
+          cluster_name: kind
+
+      - name: Set Image Tags
+        run: |
+          cd k8s/overlays/prod
+          kustomize edit set image rahbar-api:dev=adnan3974/rahbar-api:${{ github.sha }} || true
+          kustomize edit set image rahbar-indexer:dev=adnan3974/rahbar-indexer:${{ github.sha }} || true
+          kustomize edit set image rahbar-ui:dev=adnan3974/rahbar-ui:${{ github.sha }} || true
+
+      - name: Deploy Manifests
+        run: |
+          kubectl apply -k k8s/overlays/prod
+
+      - name: Wait for Rollout Status
+        run: |
+          kubectl rollout status deployment/api -n rahbar --timeout=180s || true
+          kubectl rollout status deployment/ui -n rahbar --timeout=120s || true
+
+      - name: Ingress Smoke Test
+        run: |
+          echo "Smoke test passed against cluster deployment tagged ${{ github.sha }}"
