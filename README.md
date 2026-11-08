@@ -37,10 +37,10 @@ flowchart TD
 
 | Method | Endpoint | Description | Request Payload | Response Contract |
 |---|---|---|---|---|
-| `GET` | `/healthz` | Liveness probe: verifies process is alive (zero dependency coupling) | None | `{"status": "alive"}` |
-| `GET` | `/readyz` | Readiness probe: verifies Chroma, collection > 0, Redis, and model pin | None | `{"status": "ready", "checks": {...}}` |
-| `GET` | `/metrics` | Prometheus metrics endpoint for monitoring and custom HPA scaling | None | Prometheus text format |
-| `POST` | `/api/ask` | Main question-answering endpoint with schema-validated output | `{"question": "..."}` | `AskResponse` JSON with citations and retrieved passages |
+| GET | /healthz | Liveness probe: verifies process is alive (zero dependency coupling) | None | {"status": "alive"} |
+| GET | /readyz | Readiness probe: verifies Chroma, collection > 0, Redis, and model pin | None | {"status": "ready", "checks": {...}} |
+| GET | /metrics | Prometheus metrics endpoint for monitoring and custom HPA scaling | None | Prometheus text format |
+| POST | /api/ask | Main question-answering endpoint with schema-validated output | {"question": "..."} | AskResponse JSON with citations and retrieved passages |
 
 ---
 
